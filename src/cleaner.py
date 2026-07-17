@@ -2,10 +2,12 @@ import pandas as pd
 import numpy as np
 import re
 from datetime import datetime
+from pathlib import Path
 
 # Path Configuration 
-RAW_PATH   = "data/raw/jobs_raw.csv"
-CLEAN_PATH = "data/cleaned/jobs_clean.csv"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+RAW_PATH = PROJECT_ROOT / "data" / "raw" / "jobs_raw.csv"
+CLEAN_PATH = PROJECT_ROOT / "data" / "cleaned" / "jobs_clean.csv"
 
 #Step-1:Load and Basic CleanUP
 def load_and_clean(df):
