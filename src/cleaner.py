@@ -43,9 +43,40 @@ def load_and_clean(df):
 
     return df
 
+def fix_dates_format(df):
+    def parse_date(val):
+        if pd.isna(val) or str(val).strip() == "":
+            return pd.NaT
+        val = str(val).strip()
+        try:
+            return pd.to_datetime(val, utc=True).normalize()
+        except Exception:
+            return pd.NaT
+
+    df["posted_date"] = df["posted_date_raw"].apply(parse_date)
+    df["posted_date"] = pd.to_datetime(df["posted_date"], utc=True)
+
+    # Days since posted (from scrape date)
+    df["scraped_at_dt"] = pd.to_datetime(df["scraped_at"], utc=True, errors="coerce")
+    df["days_since_posted"] = (
+        df["scraped_at_dt"] - df["posted_date"]
+    ).dt.days
+
+    # Month label for trend analysis
+    df["posted_month"] = df["posted_date"].dt.to_period("M").astype(str)
+    df["posted_month"] = df["posted_month"].fillna("Unknown")
+
+    null_dates = df["posted_date"].isna().sum()
+    print(f"  {null_dates} rows with no date → marked as NaT")
+    print(f"  Date range: {df['posted_date'].min()} → {df['posted_date'].max()}")
+
+    return df
+
 if __name__ == "__main__":
     print("Job Market Intel — Data Cleaning Pipeline")
 
     df = pd.read_csv(RAW_PATH)
 
     df = load_and_clean(df)
+    
+    df = fix_dates_format(df)
