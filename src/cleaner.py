@@ -106,6 +106,39 @@ def extract_from_description(df):
                 found.append(skill)
         return ", ".join(found) if found else "Not specified"
     df["skills_extracted"] = df.apply(extract_skills, axis=1)
+    
+    #EXPERIENCE EXTRACTION
+    def extract_experience(row):
+        text_sources = [
+            str(row.get("description_snippet", "") or ""),
+            str(row.get("job_title", "") or ""),
+            str(row.get("search_keyword", "") or ""),
+        ]
+        combined = " ".join(text_sources).lower()
+
+        # Fresher / entry-level signals
+        if any(x in combined for x in ["fresher", "0-1 year", "0 - 1 year",
+                                         "entry level", "entry-level", "0-2 year",
+                                         "recent graduate", "junior"]):
+            return "Fresher (0-2 yrs)"
+
+        # Mid-level signals
+        if any(x in combined for x in ["2-4 year", "2 - 4 year", "3-5 year",
+                                         "2+ year", "3+ year"]):
+            return "Mid (2-5 yrs)"
+
+        # Senior signals
+        if any(x in combined for x in ["5+ year", "5-8 year", "senior",
+                                         "lead", "principal"]):
+            return "Senior (5+ yrs)"
+
+        # Internship
+        if any(x in combined for x in ["intern", "internship", "stipend",
+                                         "trainee"]):
+            return "Internship"
+
+        return "Not specified"
+    df["experience_extracted"] = df.apply(extract_experience, axis=1)
 
 if __name__ == "__main__":
     print("Job Market Intel — Data Cleaning Pipeline")
