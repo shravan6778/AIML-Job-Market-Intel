@@ -256,6 +256,45 @@ def standardize(df):
 
     return df
 
+def save(df):
+    final_cols = [
+        "source_platform",
+        "job_title",
+        "company",
+        "company_size",
+        "location",
+        "role_category",
+        "experience_extracted",
+        "employment_type_clean",
+        "skills_extracted",
+        "salary_label",
+        "salary_mid_lpa",
+        "posted_date",
+        "posted_month",
+        "days_since_posted",
+        "description_snippet",
+        "job_url",
+    ]
+
+    df_final = df[final_cols].copy()
+    df_final = df_final.rename(columns={
+        "employment_type_clean": "employment_type",
+        "experience_extracted":  "experience_level",
+    })
+
+    CLEAN_PATH.parent.mkdir(parents=True, exist_ok=True)
+    df_final.to_csv(CLEAN_PATH, index=False)
+    print(f"\n✅ Saved to {CLEAN_PATH}")
+    print(f"   Shape: {df_final.shape}")
+    print(f"\n── Column null counts (final) ──")
+    print(df_final.isnull().sum().to_string())
+    print(f"\n── Sample output ──")
+    print(df_final[["job_title", "company", "role_category",
+                     "experience_level", "skills_extracted",
+                     "salary_label", "posted_month"]].head(5).to_string())
+
+    return df_final
+
 if __name__ == "__main__":
     print("Job Market Intel — Data Cleaning Pipeline")
 
@@ -266,3 +305,7 @@ if __name__ == "__main__":
     df = fix_dates_format(df)
     
     df = extract_from_description(df)
+    
+    df = standardize(df)
+    
+    df = save(df)
