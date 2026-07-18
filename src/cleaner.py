@@ -25,6 +25,23 @@ SKILL_KEYWORDS = [
     "power bi", "tableau", "excel", "r", "java", "c++",
 ]
 
+# Role category mapping
+ROLE_MAP = {
+    "ml engineer":    "ML Engineer",
+    "machine learning": "ML Engineer",
+    "ai engineer":    "AI Engineer",
+    "ai programmer":  "AI Engineer",
+    "data scientist": "Data Scientist",
+    "data analyst":   "Data Analyst",
+    "genai":          "GenAI/LLM Engineer",
+    "llm":            "GenAI/LLM Engineer",
+    "generative ai":  "GenAI/LLM Engineer",
+    "nlp":            "NLP Engineer",
+    "computer vision":"Computer Vision Engineer",
+    "deep learning":  "ML Engineer",
+    "data engineer":  "Data Engineer",
+}
+
 #Step-1:Load and Basic CleanUP
 def load_and_clean(df):
     print("Check whether all the data is loaded...\nLoaded {len(df)} rows")
@@ -196,6 +213,17 @@ def standardize(df):
 
     df["employment_type_clean"] = df["employment_type"].apply(clean_employment)
     
+    #ROLE CATEGORY 
+    def categorize_role(title):
+        if pd.isna(title):
+            return "Other"
+        title_lower = str(title).lower()
+        for keyword, category in ROLE_MAP.items():
+            if keyword in title_lower:
+                return category
+        return "Other"
+
+    df["role_category"] = df["job_title"].apply(categorize_role)
 
 if __name__ == "__main__":
     print("Job Market Intel — Data Cleaning Pipeline")
