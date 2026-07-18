@@ -140,6 +140,43 @@ def extract_from_description(df):
         return "Not specified"
     df["experience_extracted"] = df.apply(extract_experience, axis=1)
 
+    #SALARY EXTRACTION
+    def extract_salary(val, description):
+        # First try the salary column
+        for text in [str(val or ""), str(description or "")]:
+            text_lower = text.lower()
+            # Match patterns like "4-7 LPA", "6 LPA", "8-12 LPA"
+            match = re.search(r'(\d+(?:\.\d+)?)\s*[-–to]+\s*(\d+(?:\.\d+)?)\s*lpa', text_lower)
+            if match:
+                low, high = float(match.group(1)), float(match.group(2))
+                return f"{low}-{high} LPA", round((low + high) / 2, 1)
+            # Single value like "6 LPA"
+            match = re.search(r'(\d+(?:\.\d+)?)\s*lpa', text_lower)
+            if match:
+                val_num = float(match.group(1))
+                return f"{val_num} LPA", val_num
+            # Per month stipend
+            match = re.search(r'(\d+(?:,\d+)?)\s*(?:per month|/month|pm)', text_lower)
+            if match:
+                monthly = float(match.group(1).replace(",", ""))
+                annual = round(monthly * 12 / 100000, 1)
+                return f"~{annual} LPA (stipend)", annual
+        return "Not disclosed", np.nan
+
+    df[["salary_label", "salary_mid_lpa"]] = df.apply(
+        lambda r: pd.Series(extract_salary(r["salary"], r["description_snippet"])),
+        axis=1
+    )
+
+    skills_found = (df["skills_extracted"] != "Not specified").sum()
+    exp_found    = (df["experience_extracted"] != "Not specified").sum()
+    sal_found    = (df["salary_label"] != "Not disclosed").sum()
+    print(f"Skills extracted: {skills_found}/{len(df)} rows")
+    print(f"Experience extracted: {exp_found}/{len(df)} rows")
+    print(f"Salary found: {sal_found}/{len(df)} rows")
+
+    return df
+    
 if __name__ == "__main__":
     print("Job Market Intel — Data Cleaning Pipeline")
 
