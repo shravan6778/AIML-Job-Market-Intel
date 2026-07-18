@@ -9,6 +9,22 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RAW_PATH = PROJECT_ROOT / "data" / "raw" / "jobs_raw.csv"
 CLEAN_PATH = PROJECT_ROOT / "data" / "cleaned" / "jobs_clean.csv"
 
+# Skills we care about for Hyderabad AI/ML market
+SKILL_KEYWORDS = [
+    "python", "sql", "numpy", "pandas", "matplotlib", "scikit-learn", "sklearn",
+    "tensorflow", "keras", "pytorch", "opencv", "nlp", "spacy", "nltk",
+    "transformers", "huggingface", "langchain", "langgraph", "llamaindex",
+    "rag", "vector database", "pinecone", "weaviate", "chromadb", "faiss",
+    "llm", "openai", "gemini", "claude", "mistral", "ollama",
+    "mlflow", "dvc", "airflow", "fastapi", "flask", "docker", "kubernetes",
+    "aws", "azure", "gcp", "spark", "hadoop", "pyspark",
+    "git", "linux", "rest api", "mongodb", "postgresql", "mysql",
+    "agentic ai", "multi-agent", "prompt engineering", "fine-tuning",
+    "computer vision", "object detection", "yolo", "cnn", "rnn", "lstm",
+    "bert", "gpt", "stable diffusion", "generative ai", "genai",
+    "power bi", "tableau", "excel", "r", "java", "c++",
+]
+
 #Step-1:Load and Basic CleanUP
 def load_and_clean(df):
     print("Check whether all the data is loaded...\nLoaded {len(df)} rows")
@@ -72,6 +88,25 @@ def fix_dates_format(df):
 
     return df
 
+def extract_from_description(df):
+    #SKILLS EXTRACTION
+    def extract_skills(row):
+        text_sources = [
+            str(row.get("description_snippet", "") or ""),
+            str(row.get("job_title", "") or ""),
+            str(row.get("search_keyword", "") or ""),
+            str(row.get("job_url", "") or ""),
+        ]
+        combined = " ".join(text_sources).lower()
+
+        found = []
+        for skill in SKILL_KEYWORDS:
+            pattern = r'\b' + re.escape(skill) + r'\b'
+            if re.search(pattern, combined):
+                found.append(skill)
+        return ", ".join(found) if found else "Not specified"
+    df["skills_extracted"] = df.apply(extract_skills, axis=1)
+
 if __name__ == "__main__":
     print("Job Market Intel — Data Cleaning Pipeline")
 
@@ -80,3 +115,5 @@ if __name__ == "__main__":
     df = load_and_clean(df)
     
     df = fix_dates_format(df)
+    
+    df = extract_from_description(df)
