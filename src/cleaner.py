@@ -224,6 +224,37 @@ def standardize(df):
         return "Other"
 
     df["role_category"] = df["job_title"].apply(categorize_role)
+    
+    #COMPANY SIZE (heuristic from known names)
+    MNC_NAMES = ["tcs", "infosys", "wipro", "accenture", "ibm", "microsoft",
+                 "google", "amazon", "cognizant", "capgemini", "dxc", "hcl",
+                 "tech mahindra", "mphasis", "oracle", "sap"]
+    STARTUP_SIGNALS = ["kore.ai", "yellow.ai", "caw", "tessell", "nisum",
+                       "talent500", "facilio", "unbxd", "darwinbox"]
+
+    def company_size(company):
+        if pd.isna(company):
+            return "Unknown"
+        c = str(company).lower()
+        if any(m in c for m in MNC_NAMES):
+            return "MNC / Large"
+        if any(s in c for s in STARTUP_SIGNALS):
+            return "Startup"
+        return "Mid-size / Unknown"
+
+    df["company_size"] = df["company"].apply(company_size)
+
+    #FILL REMAINING NULLS
+    df["company"]  = df["company"].fillna("Unknown Company")
+    df["location"] = df["location"].fillna("Hyderabad (assumed)")
+
+    # Category counts
+    print("  Role categories:\n",
+          df["role_category"].value_counts().to_string())
+    print("  Employment types:\n",
+          df["employment_type_clean"].value_counts().to_string())
+
+    return df
 
 if __name__ == "__main__":
     print("Job Market Intel — Data Cleaning Pipeline")
