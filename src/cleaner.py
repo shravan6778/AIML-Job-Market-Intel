@@ -176,7 +176,27 @@ def extract_from_description(df):
     print(f"Salary found: {sal_found}/{len(df)} rows")
 
     return df
+
+def standardize(df):
+    #EMPLOYMENT TYPE
+    def clean_employment(val):
+        if pd.isna(val):
+            return "Not specified"
+        val = str(val).lower()
+        val = val.replace("–", "-").replace("—", "-")  # fix em-dashes
+        if "full" in val:
+            return "Full-time"
+        if "intern" in val or "trainee" in val:
+            return "Internship"
+        if "part" in val:
+            return "Part-time"
+        if "contract" in val or "freelance" in val:
+            return "Contract"
+        return "Not specified"
+
+    df["employment_type_clean"] = df["employment_type"].apply(clean_employment)
     
+
 if __name__ == "__main__":
     print("Job Market Intel — Data Cleaning Pipeline")
 
