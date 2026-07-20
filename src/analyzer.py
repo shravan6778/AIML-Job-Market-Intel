@@ -83,6 +83,33 @@ def q3_role_distribution(df):
     print(role_counts.to_string(index=False))
     return role_counts
 
+# Q4: WEEKLY POSTING TREND
+def q4_weekly_trend(df):
+    dated = df[df["posted_date"].notna()].copy()
+
+    # Filter to recent data only (2025 onward)
+    dated = dated[dated["posted_date"].dt.year >= 2025]
+
+    dated["week"] = dated["posted_date"].dt.to_period("W").dt.start_time
+
+    weekly = (
+        dated.groupby("week")
+        .size()
+        .reset_index(name="job_count")
+        .sort_values("week")
+    )
+
+    # 3-week rolling average (NumPy)
+    weekly["rolling_avg"] = np.convolve(
+        weekly["job_count"].values,
+        np.ones(3) / 3,
+        mode="same"
+    )
+
+    print(f"\n── Q4: Weekly Trend ({len(weekly)} weeks) ──")
+    print(weekly.tail(8).to_string(index=False))
+    return weekly
+
 if __name__ == "__main__":
     print("Job Market Intel — EDA & Analysis")
 
@@ -93,4 +120,8 @@ if __name__ == "__main__":
     q2 = q2_fresher_companies(df)
     
     q3 = q3_role_distribution(df)
+    
+    q4 = q4_weekly_trend(df)
+    
+    
     
