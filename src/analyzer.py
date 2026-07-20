@@ -12,8 +12,41 @@ def load_data():
     print(f"Loaded {len(df)} rows for analysis\n")
     return df
 
+#Q1: TOP 20 IN-DEMAND SKILLS
+def q1_top_skills(df):
+    # Keep only rows that have skills
+    has_skills = df[df["skills_extracted"] != "Not specified"].copy()
+
+    # Split comma-separated skills into lists, explode into rows
+    skill_series = (
+        has_skills["skills_extracted"]
+        .str.split(",")
+        .explode()
+        .str.strip()
+        .str.lower()
+    )
+    
+    # Count and sort
+    skill_counts = skill_series.value_counts()
+
+    # Total jobs with skills (denominator for % calculation)
+    total = len(has_skills)
+
+    # Build result DataFrame
+    result = pd.DataFrame({
+        "skill":   skill_counts.index,
+        "count":   skill_counts.values,
+        "pct_jobs": np.round(skill_counts.values / total * 100, 1),
+    }).head(20)
+    
+    print("── Q1: Top 20 Skills ──")
+    print(result.to_string(index=False))
+    return result
+
 if __name__ == "__main__":
     print("Job Market Intel — EDA & Analysis")
 
     df = load_data()
+    
+    q1 = q1_top_skills(df)
     
