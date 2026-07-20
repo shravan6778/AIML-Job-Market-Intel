@@ -6,6 +6,12 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CLEAN_PATH = PROJECT_ROOT / "data" / "cleaned" / "jobs_clean.csv"
 
+# Your current skill set 
+YOUR_SKILLS = [
+    "python", "numpy", "pandas", "matplotlib",
+    "fastapi", "git", "sql",
+]
+
 def load_data():
     df = pd.read_csv(CLEAN_PATH)
     df["posted_date"] = pd.to_datetime(df["posted_date"], utc=True, errors="coerce")
@@ -144,6 +150,46 @@ def q5_skill_cooccurrence(df, top_n=12):
     print(cooc_df.to_string())
     return cooc_df, top_skills
 
+# Q6: YOUR SKILL COVERAGE VS MARKET
+def q6_skill_gap(df, top_n=15):
+
+    has_skills = df[df["skills_extracted"] != "Not specified"].copy()
+    skill_series = (
+        has_skills["skills_extracted"]
+        .str.split(",")
+        .explode()
+        .str.strip()
+        .str.lower()
+    )
+    top_skills = skill_series.value_counts().head(top_n)
+
+    your_lower = [s.lower() for s in YOUR_SKILLS]
+
+    result = pd.DataFrame({
+        "skill":        top_skills.index,
+        "market_count": top_skills.values,
+        "you_have":     [s in your_lower for s in top_skills.index],
+    })
+
+    coverage = result["you_have"].sum()
+    print(f"\n── Q6: Skill Gap Analysis ──")
+    print(f"  You cover {coverage}/{top_n} top market skills")
+    print(result.to_string(index=False))
+    return result
+
+# SUMMARY STATS 
+def summary_stats(df):
+    print("SUMMARY STATS")
+    print(f"Total job postings analysed : {len(df)}")
+    print(f"Unique companies : {df['company'].nunique()}")
+    print(f"Date range : {df['posted_date'].min()} → {df['posted_date'].max()}")
+    print(f"Fresher-friendly roles : {(df['experience_level']=='Fresher (0-2 yrs)').sum()}")
+    print(f"Internships : {(df['experience_level']=='Internship').sum()}")
+    print(f"Remote/WFH in titles : {df['job_title'].str.contains('remote|wfh|work from home', case=False, na=False).sum()}")
+    print(f"Salary disclosed : {(df['salary_label']!='Not disclosed').sum()}")
+    print(f"Most common role : {df['role_category'].value_counts().idxmax()}")
+    print(f"Top hiring company : {df['company'].value_counts().idxmax()}")
+
 if __name__ == "__main__":
     print("Job Market Intel — EDA & Analysis")
 
@@ -157,5 +203,10 @@ if __name__ == "__main__":
     
     q4 = q4_weekly_trend(df)
     
+    q5 = q5_skill_cooccurrence(df)
+    
+    q6 = q6_skill_gap(df)
+    
+    summary_stats(df)
     
     
