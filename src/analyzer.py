@@ -43,6 +43,30 @@ def q1_top_skills(df):
     print(result.to_string(index=False))
     return result
 
+# Q2: TOP COMPANIES HIRING FRESHERS 
+def q2_fresher_companies(df):
+    fresher_mask = df["experience_level"].isin(["Fresher (0-2 yrs)", "Internship"])
+    freshers = df[fresher_mask].copy()
+
+    company_counts = (
+        freshers["company"]
+        .value_counts()
+        .reset_index()
+    )
+    company_counts.columns = ["company", "job_count"]
+
+    # Add company size tag
+    company_counts = company_counts.merge(
+        df[["company", "company_size"]].drop_duplicates("company"),
+        on="company", how="left"
+    )
+
+    result = company_counts.head(15)
+
+    print("\n── Q2: Top Companies Hiring Freshers ──")
+    print(result.to_string(index=False))
+    return result
+
 if __name__ == "__main__":
     print("Job Market Intel — EDA & Analysis")
 
@@ -50,3 +74,4 @@ if __name__ == "__main__":
     
     q1 = q1_top_skills(df)
     
+    q2 = q2_fresher_companies(df)
