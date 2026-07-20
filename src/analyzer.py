@@ -110,6 +110,40 @@ def q4_weekly_trend(df):
     print(weekly.tail(8).to_string(index=False))
     return weekly
 
+# Q5: SKILL CO-OCCURRENCE MATRIX 
+def q5_skill_cooccurrence(df, top_n=12):
+    has_skills = df[df["skills_extracted"] != "Not specified"].copy()
+    has_skills["skills_list"] = (
+        has_skills["skills_extracted"]
+        .str.split(",")
+        .apply(lambda lst: [s.strip().lower() for s in lst])
+    )
+
+    # Get top N skills by frequency
+    all_skills = has_skills["skills_list"].explode()
+    top_skills = all_skills.value_counts().head(top_n).index.tolist()
+
+    # Build co-occurrence matrix using NumPy
+    n = len(top_skills)
+    skill_idx = {s: i for i, s in enumerate(top_skills)}
+    matrix = np.zeros((n, n), dtype=int)
+
+    for skills in has_skills["skills_list"]:
+        # Only top skills present in this posting
+        present = [s for s in skills if s in skill_idx]
+        for i, s1 in enumerate(present):
+            for s2 in present[i:]:   # upper triangle only
+                r, c = skill_idx[s1], skill_idx[s2]
+                matrix[r][c] += 1
+                if r != c:
+                    matrix[c][r] += 1  # mirror
+
+    cooc_df = pd.DataFrame(matrix, index=top_skills, columns=top_skills)
+
+    print(f"\n── Q5: Co-occurrence Matrix ({top_n}×{top_n}) ──")
+    print(cooc_df.to_string())
+    return cooc_df, top_skills
+
 if __name__ == "__main__":
     print("Job Market Intel — EDA & Analysis")
 
