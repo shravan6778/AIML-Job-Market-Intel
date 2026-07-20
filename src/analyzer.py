@@ -67,6 +67,22 @@ def q2_fresher_companies(df):
     print(result.to_string(index=False))
     return result
 
+# Q3: ROLE CATEGORY DISTRIBUTION 
+def q3_role_distribution(df):
+    role_counts = (
+        df[df["role_category"] != "Other"]["role_category"]
+        .value_counts()
+        .reset_index()
+    )
+    role_counts.columns = ["role", "count"]
+    role_counts["pct"] = np.round(
+        role_counts["count"] / role_counts["count"].sum() * 100, 1
+    )
+
+    print("\n── Q3: Role Distribution ──")
+    print(role_counts.to_string(index=False))
+    return role_counts
+
 if __name__ == "__main__":
     print("Job Market Intel — EDA & Analysis")
 
@@ -75,3 +91,6 @@ if __name__ == "__main__":
     q1 = q1_top_skills(df)
     
     q2 = q2_fresher_companies(df)
+    
+    q3 = q3_role_distribution(df)
+    
