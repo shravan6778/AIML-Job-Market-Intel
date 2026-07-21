@@ -140,7 +140,31 @@ def build_report(df):
         for spine in ax.spines.values():
             spine.set_edgecolor(C_GRAY_LIGHT)
             spine.set_linewidth(0.8)
-            
+    # PANEL 1: TOP 15 SKILLS 
+    skills_df = get_top_skills(df, 15)
+    skills_df = skills_df.sort_values("count")          # ascending for barh
+
+    colors_p1 = [C_TEAL if c >= 20 else C_TEAL_LIGHT for c in skills_df["count"]]
+    bars = ax1.barh(skills_df["skill"], skills_df["count"],
+                    color=colors_p1, height=0.65, edgecolor="none")
+
+    for bar, val in zip(bars, skills_df["count"]):
+        ax1.text(val + 0.8, bar.get_y() + bar.get_height()/2,
+                 str(val), va="center", ha="left",
+                 fontsize=8.5, color=TEXT_MID)
+
+    ax1.set_title("Top 15 In-Demand Skills", fontsize=12,
+                  fontweight="bold", color=TEXT_DARK, pad=10)
+    ax1.set_xlabel("No. of job postings", fontsize=9, color=TEXT_MID)
+    ax1.tick_params(axis="y", labelsize=9)
+    ax1.tick_params(axis="x", labelsize=8, colors=TEXT_MID)
+    ax1.set_xlim(0, skills_df["count"].max() * 1.2)
+    ax1.xaxis.grid(True, linestyle="--", alpha=0.4, color=C_GRAY_LIGHT)
+    ax1.set_axisbelow(True)
+    high_patch = mpatches.Patch(color=C_TEAL, label="High demand (≥20 jobs)")
+    ax1.legend(handles=[high_patch], fontsize=8, loc="lower right",
+               framealpha=0.8, edgecolor=C_GRAY_LIGHT)
+    
 if __name__ == "__main__":
     print("Job Market Intel — Visualization")
     df = load_and_prep()
