@@ -255,6 +255,34 @@ def build_report(df):
     )
     plt.setp(ax4.xaxis.get_majorticklabels(), ha="right")
     
+    # PANEL 5: SKILL CO-OCCURRENCE HEATMAP
+    mat, top_skills = get_cooccurrence(df, 10)
+
+    # Normalize by diagonal (self-count before we zeroed it) for % view
+    # Use raw counts, displayed with imshow
+    im = ax5.imshow(mat, cmap="YlOrRd", aspect="auto")
+
+    ax5.set_xticks(range(len(top_skills)))
+    ax5.set_yticks(range(len(top_skills)))
+    ax5.set_xticklabels(top_skills, rotation=45, ha="right", fontsize=8)
+    ax5.set_yticklabels(top_skills, fontsize=8)
+
+    # Annotate cells with count
+    for i in range(len(top_skills)):
+        for j in range(len(top_skills)):
+            val = mat[i, j]
+            if val > 0:
+                text_color = "white" if val > mat.max() * 0.55 else TEXT_DARK
+                ax5.text(j, i, str(val), ha="center", va="center",
+                         fontsize=7, color=text_color)
+
+    ax5.set_title("Skill Co-occurrence Matrix", fontsize=12,
+                  fontweight="bold", color=TEXT_DARK, pad=10)
+    ax5.text(0.5, -0.22,
+             "Cell value = jobs where both skills appear together",
+             transform=ax5.transAxes, ha="center", fontsize=8, color=TEXT_MID)
+    plt.colorbar(im, ax=ax5, fraction=0.046, pad=0.04).ax.tick_params(labelsize=7)
+    
 if __name__ == "__main__":
     print("Job Market Intel — Visualization")
     df = load_and_prep()
