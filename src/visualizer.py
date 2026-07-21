@@ -165,6 +165,32 @@ def build_report(df):
     ax1.legend(handles=[high_patch], fontsize=8, loc="lower right",
                framealpha=0.8, edgecolor=C_GRAY_LIGHT)
     
+    # PANEL 2: ROLE DISTRIBUTION
+    role_df = get_role_dist(df).sort_values("count")
+    role_colors = [C_PURPLE, C_BLUE, C_TEAL, C_AMBER, C_CORAL,
+                   C_GRAY, C_GRAY_LIGHT, C_TEAL_LIGHT][:len(role_df)]
+
+    bars2 = ax2.barh(role_df["role"], role_df["count"],
+                     color=role_colors[::-1], height=0.6, edgecolor="none")
+
+    total_roles = role_df["count"].sum()
+    for bar, val in zip(bars2, role_df["count"]):
+        pct = val / total_roles * 100
+        ax2.text(val + 0.5, bar.get_y() + bar.get_height()/2,
+                 f"{val}  ({pct:.0f}%)", va="center", ha="left",
+                 fontsize=8.5, color=TEXT_MID)
+
+    ax2.set_title("Role Category Distribution", fontsize=12,
+                  fontweight="bold", color=TEXT_DARK, pad=10)
+    ax2.set_xlabel("No. of job postings", fontsize=9, color=TEXT_MID)
+    ax2.tick_params(axis="y", labelsize=9)
+    ax2.tick_params(axis="x", labelsize=8, colors=TEXT_MID)
+    ax2.set_xlim(0, role_df["count"].max() * 1.35)
+    ax2.xaxis.grid(True, linestyle="--", alpha=0.4, color=C_GRAY_LIGHT)
+    ax2.set_axisbelow(True)
+    ax2.text(0.98, 0.02, f"n = {total_roles} (excl. untagged)",
+             transform=ax2.transAxes, ha="right", fontsize=8, color=TEXT_MID)
+    
 if __name__ == "__main__":
     print("Job Market Intel — Visualization")
     df = load_and_prep()
