@@ -315,6 +315,23 @@ def build_report(df):
     ax6.legend(handles=[have_patch, miss_patch], fontsize=8.5,
                loc="lower right", framealpha=0.8, edgecolor=C_GRAY_LIGHT)
     
+    # FOOTER 
+    fig.text(
+        0.5, 0.01,
+        "Data sourced from Naukri · LinkedIn · HiringGo · Instahyre via JSearch API  ·  "
+        "Analysis: Python · pandas · NumPy · Matplotlib  ·  github.com/shravan/job-market-intel",
+        ha="center", fontsize=8, color=TEXT_MID, style="italic"
+    )
+
+    # SAVE 
+    import os
+    os.makedirs("outputs/report_figures", exist_ok=True)
+    plt.savefig(OUTPUT_PATH, dpi=150, bbox_inches="tight",
+                facecolor=BG, edgecolor="none")
+    print(f"\nReport saved → {OUTPUT_PATH}")
+    plt.close()
+    
 if __name__ == "__main__":
     print("Job Market Intel — Visualization")
     df = load_and_prep()
+    build_report(df)
