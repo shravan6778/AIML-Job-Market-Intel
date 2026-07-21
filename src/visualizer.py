@@ -219,6 +219,42 @@ def build_report(df):
     ax3.text(0.98, 0.02, f"Total fresher roles: {total_fresher}",
              transform=ax3.transAxes, ha="right", fontsize=8, color=TEXT_MID)
     
+    # PANEL 4: WEEKLY POSTING TREND
+    weekly = get_weekly_trend(df)
+
+    ax4.fill_between(weekly["week"], weekly["count"],
+                     alpha=0.18, color=C_BLUE)
+    ax4.plot(weekly["week"], weekly["count"],
+             color=C_BLUE, linewidth=1.5, marker="o",
+             markersize=4, label="Weekly postings")
+    ax4.plot(weekly["week"], weekly["rolling"],
+             color=C_CORAL, linewidth=2, linestyle="--",
+             label="3-week rolling avg")
+
+    # Annotate the peak
+    peak_idx = weekly["count"].idxmax()
+    peak_row = weekly.loc[peak_idx]
+    ax4.annotate(
+        f"Peak: {int(peak_row['count'])} jobs",
+        xy=(peak_row["week"], peak_row["count"]),
+        xytext=(0, 12), textcoords="offset points",
+        ha="center", fontsize=8.5, color=C_CORAL, fontweight="bold",
+        arrowprops=dict(arrowstyle="->", color=C_CORAL, lw=1.2)
+    )
+
+    ax4.set_title("Weekly Job Posting Trend (2025–2026)", fontsize=12,
+                  fontweight="bold", color=TEXT_DARK, pad=10)
+    ax4.set_ylabel("Job postings per week", fontsize=9, color=TEXT_MID)
+    ax4.tick_params(axis="x", rotation=35, labelsize=8)
+    ax4.tick_params(axis="y", labelsize=8)
+    ax4.legend(fontsize=8.5, framealpha=0.8, edgecolor=C_GRAY_LIGHT)
+    ax4.yaxis.grid(True, linestyle="--", alpha=0.4, color=C_GRAY_LIGHT)
+    ax4.set_axisbelow(True)
+    ax4.xaxis.set_major_formatter(
+        matplotlib.dates.DateFormatter("%b %d")
+    )
+    plt.setp(ax4.xaxis.get_majorticklabels(), ha="right")
+    
 if __name__ == "__main__":
     print("Job Market Intel — Visualization")
     df = load_and_prep()
