@@ -106,6 +106,41 @@ def get_skill_gap(df, n=12):
         "you_have": [s in your_lower for s in top.index],
     })
     
+# FIGURE
+def build_report(df):
+    fig = plt.figure(figsize=(22, 16), facecolor=BG)
+    fig.suptitle(
+        "Hyderabad AI/ML Job Market Intelligence Report  ·  2025–2026",
+        fontsize=20, fontweight="bold", color=TEXT_DARK, y=0.98
+    )
+    fig.text(
+        0.5, 0.955,
+        f"Based on {len(df):,} real job postings · {df['company'].nunique()} companies · "
+        f"Scraped July 2026",
+        ha="center", fontsize=11, color=TEXT_MID
+    )
+
+    gs = GridSpec(
+        2, 3,
+        figure=fig,
+        left=0.06, right=0.97,
+        top=0.92, bottom=0.07,
+        hspace=0.42, wspace=0.35
+    )
+
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax2 = fig.add_subplot(gs[0, 1])
+    ax3 = fig.add_subplot(gs[0, 2])
+    ax4 = fig.add_subplot(gs[1, 0])
+    ax5 = fig.add_subplot(gs[1, 1])
+    ax6 = fig.add_subplot(gs[1, 2])
+
+    for ax in [ax1,ax2,ax3,ax4,ax5,ax6]:
+        ax.set_facecolor(CARD_BG)
+        for spine in ax.spines.values():
+            spine.set_edgecolor(C_GRAY_LIGHT)
+            spine.set_linewidth(0.8)
+            
 if __name__ == "__main__":
     print("Job Market Intel — Visualization")
     df = load_and_prep()
