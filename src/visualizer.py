@@ -191,6 +191,34 @@ def build_report(df):
     ax2.text(0.98, 0.02, f"n = {total_roles} (excl. untagged)",
              transform=ax2.transAxes, ha="right", fontsize=8, color=TEXT_MID)
     
+    # PANEL 3: TOP COMPANIES HIRING FRESHERS
+    comp_df = get_fresher_companies(df, 12).sort_values("count")
+
+    bars3 = ax3.barh(comp_df["company"], comp_df["count"],
+                     color=C_AMBER_LIGHT, height=0.6, edgecolor="none")
+    # Highlight top 3
+    for i, bar in enumerate(bars3):
+        if i >= len(comp_df) - 3:
+            bar.set_color(C_AMBER)
+
+    for bar, val in zip(bars3, comp_df["count"]):
+        ax3.text(val + 0.1, bar.get_y() + bar.get_height()/2,
+                 str(val), va="center", ha="left",
+                 fontsize=8.5, color=TEXT_MID)
+
+    ax3.set_title("Top Companies Hiring Freshers", fontsize=12,
+                  fontweight="bold", color=TEXT_DARK, pad=10)
+    ax3.set_xlabel("Fresher / Internship postings", fontsize=9, color=TEXT_MID)
+    ax3.tick_params(axis="y", labelsize=8.5)
+    ax3.tick_params(axis="x", labelsize=8, colors=TEXT_MID)
+    ax3.set_xlim(0, comp_df["count"].max() * 1.25)
+    ax3.xaxis.grid(True, linestyle="--", alpha=0.4, color=C_GRAY_LIGHT)
+    ax3.set_axisbelow(True)
+    total_fresher = df[df["experience_level"].isin(
+        ["Fresher (0-2 yrs)", "Internship"])].shape[0]
+    ax3.text(0.98, 0.02, f"Total fresher roles: {total_fresher}",
+             transform=ax3.transAxes, ha="right", fontsize=8, color=TEXT_MID)
+    
 if __name__ == "__main__":
     print("Job Market Intel — Visualization")
     df = load_and_prep()
