@@ -283,6 +283,38 @@ def build_report(df):
              transform=ax5.transAxes, ha="center", fontsize=8, color=TEXT_MID)
     plt.colorbar(im, ax=ax5, fraction=0.046, pad=0.04).ax.tick_params(labelsize=7)
     
+    # PANEL 6: YOUR SKILL COVERAGE VS MARKET
+    gap_df = get_skill_gap(df, 12)
+
+    bar_colors = [C_TEAL if h else C_CORAL for h in gap_df["you_have"]]
+    bars6 = ax6.barh(gap_df["skill"], gap_df["count"],
+                     color=bar_colors, height=0.65, edgecolor="none")
+
+    for bar, val in zip(bars6, gap_df["count"]):
+        ax6.text(val + 0.3, bar.get_y() + bar.get_height()/2,
+                 str(val), va="center", ha="left",
+                 fontsize=8.5, color=TEXT_MID)
+
+    have_count = gap_df["you_have"].sum()
+    miss_count = len(gap_df) - have_count
+    coverage_pct = have_count / len(gap_df) * 100
+
+    ax6.set_title(
+        f"Your Skill Coverage vs Market  ({coverage_pct:.0f}% covered)",
+        fontsize=12, fontweight="bold", color=TEXT_DARK, pad=10
+    )
+    ax6.set_xlabel("No. of job postings demanding skill", fontsize=9, color=TEXT_MID)
+    ax6.tick_params(axis="y", labelsize=9)
+    ax6.tick_params(axis="x", labelsize=8, colors=TEXT_MID)
+    ax6.set_xlim(0, gap_df["count"].max() * 1.25)
+    ax6.xaxis.grid(True, linestyle="--", alpha=0.4, color=C_GRAY_LIGHT)
+    ax6.set_axisbelow(True)
+
+    have_patch = mpatches.Patch(color=C_TEAL, label=f"You have ({have_count})")
+    miss_patch = mpatches.Patch(color=C_CORAL, label=f"Gap — learn next ({miss_count})")
+    ax6.legend(handles=[have_patch, miss_patch], fontsize=8.5,
+               loc="lower right", framealpha=0.8, edgecolor=C_GRAY_LIGHT)
+    
 if __name__ == "__main__":
     print("Job Market Intel — Visualization")
     df = load_and_prep()
